@@ -2,6 +2,7 @@ const User = require("../models/UserModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const customErrorHandler = require("../services/customErrorHandler");
+const Cloudinary_Upload = require("../services/cloudinary");
 const JWT_Secret = require("../config/config").JWT_Secret;
 const JWT_Expiry = require("../config/config").JWT_Expiry;
 
@@ -16,12 +17,14 @@ const authController = {
         return next(
           customErrorHandler.alreadyExist("Email already Registered")
         );
+      // const profileImg=await Cloudinary_Upload.uploader.upload(Cloudinary_Upload);
       const salt = bcrypt.genSaltSync(10);
       const hashPassword = bcrypt.hashSync(password, salt);
       const newUser = new User({
         email,
         fullName,
         password: hashPassword,
+        // profilePic:profileImg.secure_url
       });
       const generateToken = jwt.sign(
         {
@@ -92,9 +95,16 @@ const authController = {
       const { fullName, profilePic } = req.body;
       if (!fullName || !profilePic)
         return next(customErrorHandler.missingField("All fields are required"));
+      // const profileImg = await Cloudinary_Upload.uploader.upload(profilePic, {
+      //   folder: "profile_pictures",
+      // });
+      // const profileURL = profileImg.secure_url;
       const updatedUser = await User.findByIdAndUpdate(
         userId,
-        { fullName, profilePic },
+        {
+          fullName,
+          profilePic,
+        },
         { new: true }
       );
       return res.status(200).json({
