@@ -34,11 +34,11 @@ const authController = {
       await newUser.save();
       return res.status(200).json({
         success: true,
-        msg: "User created Successfully",
+        msg: "User Created Successfully",
         user: { id: newUser._id, email, fullName, accessToken: generateToken },
       });
     } catch (err) {
-      return next(customErrorHandler.serverError("Internal Server error"));
+      return next(customErrorHandler.serverError("User Creation Failed"));
     }
   },
 
@@ -72,7 +72,7 @@ const authController = {
         },
       });
     } catch (err) {
-      return next(customErrorHandler.serverError("Internal Server Error"));
+      return next(customErrorHandler.serverError("Login Failed"));
     }
   },
 
@@ -82,7 +82,33 @@ const authController = {
         .status(200)
         .json({ success: true, msg: "Logged out Successfully" });
     } catch (err) {
-      return next(customErrorHandler.serverError("Something Went Wrong"));
+      return next(customErrorHandler.serverError("Logout Failed"));
+    }
+  },
+
+  async updateProfile(req, res, next) {
+    try {
+      const userId = req.user.id;
+      const { fullName, profilePic } = req.body;
+      if (!fullName || !profilePic)
+        return next(customErrorHandler.missingField("All fields are required"));
+      const updatedUser = await User.findByIdAndUpdate(
+        userId,
+        { fullName, profilePic },
+        { new: true }
+      );
+      return res.status(200).json({
+        success: true,
+        msg: "User Updated Successfully",
+        user: {
+          id: updatedUser._id,
+          email: updatedUser.email,
+          fullName: updatedUser.fullName,
+          profilePic: updatedUser.profilePic,
+        },
+      });
+    } catch (err) {
+      return next(customErrorHandler.serverError("Failed To Update"));
     }
   },
 };
