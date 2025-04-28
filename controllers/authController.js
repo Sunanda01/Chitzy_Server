@@ -121,5 +121,16 @@ const authController = {
       return next(customErrorHandler.serverError("Failed To Update"));
     }
   },
+  async checkAuth(req, res, next) {
+    try {
+      const user = req.user;
+      return res.status(200).json({
+        success: true,
+        user,
+      });
+    } catch (err) {
+      return next(customErrorHandler.serverError("Cannot get User details"));
+    }
+  },
 };
 module.exports = authController;

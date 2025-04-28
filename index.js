@@ -5,11 +5,16 @@ const authRoutes = require("./routes/authRoutes");
 const messageRoutes = require("./routes/messageRoutes");
 const errorHandler = require("./middleware/errorHandler");
 const HealthCheckController = require("./controllers/health-check");
-
+const FRONTEND_URL=require("./config/config").FRONTEND_URL;
 const PORT = require("./config/config").PORT;
 const app = express();
 app.use(express.json());
-app.use(cors());
+app.use(
+  cors({
+    origin: FRONTEND_URL,
+    credentials: true,
+  })
+);
 
 app.use("/auth", authRoutes);
 app.use("/message", messageRoutes);

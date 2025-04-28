@@ -1,10 +1,10 @@
 const customErrorHandler = require("../services/customErrorHandler");
 function errorHandler(err, req, res, next) {
   let errorStatus = err.status || 500;
-  let errorMessage = err.msg || "Internal Sever Error";
+  let errorMessage = err.message || "Internal Sever Error";
   if (err instanceof customErrorHandler) {
     errorStatus = err.status;
-    errorMessage = err.msg;
+    errorMessage = err.message;
   }
   return res.status(errorStatus).json({
     success: false,
