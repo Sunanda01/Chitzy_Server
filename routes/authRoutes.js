@@ -5,5 +5,5 @@ routes.post("/signup", authController.signup);
 routes.post("/login", authController.login);
 routes.post("/logout", verifyToken, authController.logout);
 routes.put("/update", verifyToken, authController.updateProfile);
-routes.get("/check-auth", verifyToken, authController.checkAuth);
+// routes.get("/check-auth", verifyToken, authController.checkAuth);
 module.exports = routes;

@@ -2,29 +2,28 @@ const User = require("../models/UserModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const customErrorHandler = require("../services/customErrorHandler");
-const Cloudinary_Upload = require("../services/cloudinary");
 const JWT_Secret = require("../config/config").JWT_Secret;
 const JWT_Expiry = require("../config/config").JWT_Expiry;
 
 const authController = {
   async signup(req, res, next) {
-    const { email, fullName, password } = req.body;
+    const { email, fullName, password, profilePic } = req.body;
     try {
-      if (!email || !fullName || !password)
+      if (!email || !fullName || !password || !profilePic)
         return next(customErrorHandler.missingField("All fields are required"));
       const existUser = await User.findOne({ email });
       if (existUser)
         return next(
           customErrorHandler.alreadyExist("Email already Registered")
         );
-      // const profileImg=await Cloudinary_Upload.uploader.upload(Cloudinary_Upload);
+
       const salt = bcrypt.genSaltSync(10);
       const hashPassword = bcrypt.hashSync(password, salt);
       const newUser = new User({
         email,
         fullName,
         password: hashPassword,
-        // profilePic:profileImg.secure_url
+        profilePic,
       });
       const generateToken = jwt.sign(
         {
@@ -38,7 +37,14 @@ const authController = {
       return res.status(200).json({
         success: true,
         msg: "User Created Successfully",
-        user: { id: newUser._id, email, fullName, accessToken: generateToken },
+        user: {
+          id: newUser._id,
+          email,
+          fullName,
+          accessToken: generateToken,
+          createdAt: newUser.createdAt,
+          profilePic,
+        },
       });
     } catch (err) {
       return next(customErrorHandler.serverError("User Creation Failed"));
@@ -69,9 +75,11 @@ const authController = {
         msg: "Login In Successfully",
         user: {
           id: existUser._id,
-          name: existUser.name,
+          fullName: existUser.fullName,
           email: existUser.email,
           accessToken: generateToken,
+          createdAt: existUser.createdAt,
+          profilePic:existUser.profilePic,
         },
       });
     } catch (err) {
@@ -95,10 +103,6 @@ const authController = {
       const { fullName, profilePic } = req.body;
       if (!fullName || !profilePic)
         return next(customErrorHandler.missingField("All fields are required"));
-      // const profileImg = await Cloudinary_Upload.uploader.upload(profilePic, {
-      //   folder: "profile_pictures",
-      // });
-      // const profileURL = profileImg.secure_url;
       const updatedUser = await User.findByIdAndUpdate(
         userId,
         {
@@ -115,22 +119,23 @@ const authController = {
           email: updatedUser.email,
           fullName: updatedUser.fullName,
           profilePic: updatedUser.profilePic,
+          createdAt: updatedUser.createdAt,
         },
       });
     } catch (err) {
       return next(customErrorHandler.serverError("Failed To Update"));
     }
   },
-  async checkAuth(req, res, next) {
-    try {
-      const user = req.user;
-      return res.status(200).json({
-        success: true,
-        user,
-      });
-    } catch (err) {
-      return next(customErrorHandler.serverError("Cannot get User details"));
-    }
-  },
+  // async checkAuth(req, res, next) {
+  //   try {
+  //     const user = req.user;
+  //     return res.status(200).json({
+  //       success: true,
+  //       user,
+  //     });
+  //   } catch (err) {
+  //     return next(customErrorHandler.serverError("Cannot get User details"));
+  //   }
+  // },
 };
 module.exports = authController;
