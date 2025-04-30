@@ -79,7 +79,7 @@ const authController = {
           email: existUser.email,
           accessToken: generateToken,
           createdAt: existUser.createdAt,
-          profilePic:existUser.profilePic,
+          profilePic: existUser.profilePic,
         },
       });
     } catch (err) {
@@ -126,16 +126,16 @@ const authController = {
       return next(customErrorHandler.serverError("Failed To Update"));
     }
   },
-  // async checkAuth(req, res, next) {
-  //   try {
-  //     const user = req.user;
-  //     return res.status(200).json({
-  //       success: true,
-  //       user,
-  //     });
-  //   } catch (err) {
-  //     return next(customErrorHandler.serverError("Cannot get User details"));
-  //   }
-  // },
+  async checkAuth(req, res, next) {
+    try {
+      const user = req.user;
+      return res.status(200).json({
+        success: true,
+        user,
+      });
+    } catch (err) {
+      return next(customErrorHandler.serverError("Cannot get User details"));
+    }
+  },
 };
 module.exports = authController;

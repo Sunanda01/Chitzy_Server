@@ -1,6 +1,7 @@
 const User = require("../models/UserModel");
 const Message = require("../models/MessageModel");
 const customErrorHandler = require("../services/customErrorHandler");
+const { getReceiverSocketId, io } = require("../services/socket");
 const messageController = {
   async getUserForSidebar(req, res, next) {
     try {
@@ -22,7 +23,7 @@ const messageController = {
           { senderId: userId, receiverId: clientId },
           { senderId: clientId, receiverId: userId },
         ],
-      }).select("-createdAt -updatedAt -__v");
+      }).select("-updatedAt -__v");
       return res.status(200).json({ success: true, messages });
     } catch (err) {
       return next(
@@ -35,6 +36,9 @@ const messageController = {
       const { text, image } = req.body;
       const { id: clientId } = req.params;
       const userId = req.user.id;
+      if (!userId || !clientId) {
+        return res.status(400).json({ error: "Missing fields" });
+      }
       const newMessage = new Message({
         senderId: userId,
         receiverId: clientId,
@@ -42,18 +46,16 @@ const messageController = {
         image,
       });
       await newMessage.save();
-      return res.status(200).json({
-        success: true,
-        message: {
-          senderId: newMessage.senderId,
-          receiverId: newMessage.receiverId,
-          text: newMessage.text,
-          image: newMessage.image,
-        },
-      });
+      const receiverSocketId = getReceiverSocketId(clientId);
+      if (receiverSocketId) {
+        io.to(receiverSocketId).emit("newMessage", newMessage);
+      }
+
+      return res.status(200).json({ success: true, messages: newMessage });
     } catch (err) {
       return next(customErrorHandler.serverError("Failed To Send Message"));
     }
   },
 };
+
 module.exports = messageController;

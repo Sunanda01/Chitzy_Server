@@ -15,7 +15,7 @@ const verifyToken = async (req, res, next) => {
       next();
     });
   } catch (err) {
-    return next(customErrorHandler.tokenError("Internal Server error"));
+    return next();
   }
 };
 module.exports = verifyToken;
