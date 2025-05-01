@@ -1,4 +1,4 @@
-## Frontend Repository [https://github.com/Sunanda01/Chitzy_Client.git](https://github.com/Sunanda01/Chitzy_Client.git)
+## Frontend Repository: [https://github.com/Sunanda01/Chitzy_Client.git](https://github.com/Sunanda01/Chitzy_Client.git)
 
 ## Get Started
 Here I have actually kept the backend of Chitzy Chat App
